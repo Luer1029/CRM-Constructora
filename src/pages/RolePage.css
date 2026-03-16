@@ -1,0 +1,114 @@
+.role-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fb;
+  padding: 24px;
+}
+
+.role-card {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.12);
+  border: 1px solid #e5e7eb;
+}
+
+.role-header {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 18px 20px;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.role-content {
+  padding: 22px 24px 28px;
+  text-align: center;
+}
+
+.role-content-left {
+  text-align: left;
+}
+
+.role-message {
+  margin: 0;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.role-badge {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-toggle-btn,
+.admin-create-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-toggle-btn {
+  width: 100%;
+  background: #2563eb;
+  color: #ffffff;
+  margin-top: 14px;
+}
+
+.admin-form-card {
+  margin-top: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 14px;
+  background: #f8fbff;
+}
+
+.admin-form-title {
+  margin: 0 0 12px;
+  color: #1d4ed8;
+  font-size: 18px;
+}
+
+.admin-input-group {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-bottom: 10px;
+  padding: 2px 10px;
+}
+
+.admin-input-group input,
+.admin-input-group select {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 14px;
+}
+
+.admin-create-btn {
+  width: 100%;
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.admin-message {
+  margin: 12px 0 0;
+  color: #1f2937;
+  font-size: 14px;
+}
