@@ -64,91 +64,104 @@ function AdministradorPage(){
  };
 
  return(
-  <div className="role-bg">
-   <div className="role-card">
-    <h2 className="role-header">Panel Administrador</h2>
+  <div className="pagina-rol">
+    <div className="contenedor-rol">
+      <h1>👥 Gestión de Usuarios</h1>
 
-    <div className="role-content role-content-left">
-      <p className="role-message">Gestiona usuarios del sistema desde esta ventana.</p>
+      {mensaje && (
+        <div className={`mensaje ${mensaje.includes("Error") ? "error" : "exito"}`}>
+          {mensaje}
+        </div>
+      )}
 
       <button
-        className="admin-toggle-btn"
+        className="btn-agregar"
         onClick={() => {
           setMostrarFormulario(!mostrarFormulario);
           setMensaje("");
         }}
       >
-        {mostrarFormulario ? "Cerrar formulario" : "Crear usuario"}
+        {mostrarFormulario ? "Cancelar" : "+ Nuevo Usuario"}
       </button>
 
-      {mostrarFormulario ? (
-        <div className="admin-form-card">
-          <h3 className="admin-form-title">Nuevo usuario</h3>
+      {mostrarFormulario && (
+        <div className="formulario-container">
+          <h2>Crear Nuevo Usuario</h2>
 
-          <div className="admin-input-group">
+          <div className="form-grupo">
+            <label>Nombre:</label>
             <input
               type="text"
               placeholder="Nombre"
               value={nombre}
-              onChange={(e)=>setNombre(e.target.value)}
+              onChange={(e) => setNombre(e.target.value)}
             />
           </div>
 
-          <div className="admin-input-group">
+          <div className="form-grupo">
+            <label>Apellido:</label>
             <input
               type="text"
               placeholder="Apellido"
               value={apellido}
-              onChange={(e)=>setApellido(e.target.value)}
+              onChange={(e) => setApellido(e.target.value)}
             />
           </div>
 
-          <div className="admin-input-group">
-            <input
-              type="tel"
-              placeholder="Teléfono"
-              value={telefono}
-              onChange={(e)=>setTelefono(e.target.value)}
-            />
+          <div className="form-fila">
+            <div className="form-grupo">
+              <label>Teléfono:</label>
+              <input
+                type="tel"
+                placeholder="Teléfono"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+              />
+            </div>
+
+            <div className="form-grupo">
+              <label>Fecha de Nacimiento:</label>
+              <input
+                type="date"
+                value={fechaNacimiento}
+                onChange={(e) => setFechaNacimiento(e.target.value)}
+              />
+            </div>
           </div>
 
-          <div className="admin-input-group">
-            <input
-              type="date"
-              value={fechaNacimiento}
-              onChange={(e)=>setFechaNacimiento(e.target.value)}
-            />
-          </div>
-
-          <div className="admin-input-group">
+          <div className="form-grupo">
+            <label>Dirección:</label>
             <input
               type="text"
               placeholder="Dirección"
               value={direccion}
-              onChange={(e)=>setDireccion(e.target.value)}
+              onChange={(e) => setDireccion(e.target.value)}
             />
           </div>
 
-          <div className="admin-input-group">
+          <div className="form-grupo">
+            <label>Correo Electrónico:</label>
             <input
               type="email"
               placeholder="Correo"
               value={email}
-              onChange={(e)=>setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          <div className="admin-input-group">
+          <div className="form-grupo">
+            <label>Contraseña:</label>
             <input
               type="password"
               placeholder="Contraseña"
               value={password}
-              onChange={(e)=>setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <div className="admin-input-group">
-            <select value={rol} onChange={(e)=>setRol(e.target.value)}>
+          <div className="form-grupo">
+            <label>Rol:</label>
+            <select value={rol} onChange={(e) => setRol(e.target.value)}>
               <option value="">Seleccionar rol</option>
               <option value="administrador">Administrador</option>
               <option value="gerente">Gerente</option>
@@ -158,17 +171,20 @@ function AdministradorPage(){
             </select>
           </div>
 
-          <button className="admin-create-btn" onClick={crearUsuario}>
-            Guardar usuario
+          <button className="btn-submeter" onClick={crearUsuario}>
+            Crear Usuario
           </button>
         </div>
-      ) : null}
+      )}
 
-      {mensaje ? <p className="admin-message">{mensaje}</p> : null}
+      <div className="lista-contenedor">
+        <h2>Usuarios Registrados</h2>
+        <p style={{ color: "#6b7280", marginTop: "10px" }}>
+          Los usuarios creados aparecerán aquí.
+        </p>
+      </div>
     </div>
-   </div>
   </div>
-
  );
 
 }

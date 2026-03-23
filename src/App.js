@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import "./App.css";
 import Login from "./pages/Login";
-import AdministradorPage from "./pages/AdministradorPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import ProveedorPage from "./pages/ProveedorPage";
 import GerentePage from "./pages/GerentePage";
 import UsuarioPage from "./pages/UsuarioPage";
@@ -12,7 +12,7 @@ function App() {
 
   const pantallaPorRol = useMemo(
     () => ({
-      administrador: <AdministradorPage />,
+      administrador: <AdminDashboard />,
       proveedor: <ProveedorPage />,
       gerente: <GerentePage />,
       usuario: <UsuarioPage />,
