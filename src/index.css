@@ -1,0 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+:root {
+  --sand-50: #fff7ec;
+  --sand-100: #ffe7cf;
+  --sand-200: #ffd8b5;
+  --terracotta-500: #d1663f;
+  --terracotta-600: #b9502d;
+  --teal-500: #198f91;
+  --teal-600: #0d7678;
+  --ink-900: #233038;
+  --ink-700: #4b5a63;
+  --ink-500: #6b7c87;
+  --line: #f1d7bc;
+  --card: rgba(255, 252, 247, 0.82);
+}
+
+body {
+  margin: 0;
+  font-family: "Urbanist", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--ink-900);
+  background: linear-gradient(160deg, #fffaf0 0%, #ffe8cd 100%);
+}
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+}
