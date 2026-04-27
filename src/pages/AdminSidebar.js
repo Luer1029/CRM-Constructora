@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./AdminSidebar.css";
 
-function AdminSidebar({ activeTab, onTabChange }) {
+function AdminSidebar({ activeTab, onTabChange, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -26,6 +26,16 @@ function AdminSidebar({ activeTab, onTabChange }) {
 
         <nav className="sidebar-nav">
           <button
+            className={`sidebar-item ${activeTab === "dashboard" ? "activo" : ""}`}
+            onClick={() => {
+              onTabChange("dashboard");
+            }}
+          >
+            <span className="sidebar-icon">📊</span>
+            <span className="sidebar-label">Dashboard</span>
+          </button>
+
+          <button
             className={`sidebar-item ${activeTab === "usuarios" ? "activo" : ""}`}
             onClick={() => {
               onTabChange("usuarios");
@@ -44,7 +54,38 @@ function AdminSidebar({ activeTab, onTabChange }) {
             <span className="sidebar-icon">📁</span>
             <span className="sidebar-label">Gestión de Proyectos</span>
           </button>
+
+          <button
+            className={`sidebar-item ${activeTab === "gerentes" ? "activo" : ""}`}
+            onClick={() => {
+              onTabChange("gerentes");
+            }}
+          >
+            <span className="sidebar-icon">🧭</span>
+            <span className="sidebar-label">Gestión de Gerentes</span>
+          </button>
+
+          <button
+            className={`sidebar-item ${activeTab === "proveedores" ? "activo" : ""}`}
+            onClick={() => {
+              onTabChange("proveedores");
+            }}
+          >
+            <span className="sidebar-icon">📦</span>
+            <span className="sidebar-label">Gestión de Proveedores</span>
+          </button>
         </nav>
+
+        <div className="sidebar-footer">
+          <button
+            className="sidebar-logout-logo"
+            onClick={onLogout}
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
+          >
+            ⏻
+          </button>
+        </div>
       </aside>
 
       {/* Overlay cuando el sidebar está abierto en mobile */}

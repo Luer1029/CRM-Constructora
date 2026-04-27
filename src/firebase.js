@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { getApp, getApps, initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -24,3 +24,12 @@ const analytics = getAnalytics(app);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Instancia secundaria para crear usuarios sin reemplazar la sesión actual.
+const SECONDARY_APP_NAME = "crm-constructora-secondary";
+const secondaryApp = getApps().some((item) => item.name === SECONDARY_APP_NAME)
+  ? getApp(SECONDARY_APP_NAME)
+  : initializeApp(firebaseConfig, SECONDARY_APP_NAME);
+
+export const secondaryAuth = getAuth(secondaryApp);
+export const secondaryDb = getFirestore(secondaryApp);
