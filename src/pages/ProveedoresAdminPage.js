@@ -210,23 +210,50 @@ function ProveedoresAdminPage() {
     }, {});
   }, [proyectos]);
 
+  const estadisticasProyectosTerminados = useMemo(() => {
+    return proyectos.reduce((acc, proyecto) => {
+      const proveedorId = proyecto.proveedorId;
+      if (!proveedorId) return acc;
+
+      const estado = normalizarTexto(proyecto.estado);
+      const esTerminado = estado === "finalizado";
+
+      if (esTerminado) {
+        acc[proveedorId] = (acc[proveedorId] || 0) + 1;
+      }
+
+      return acc;
+    }, {});
+  }, [proyectos]);
+
   const promedioGlobalCalificaciones = useMemo(() => {
-    if (!calificaciones.length) return 0;
-    const suma = calificaciones.reduce((acumulado, item) => acumulado + (Number(item.puntaje) || 0), 0);
-    return (suma / calificaciones.length).toFixed(1);
-  }, [calificaciones]);
+    if (proveedores.length === 0) return 0;
+    const suma = proveedores.reduce((acumulado, proveedor) => {
+      return acumulado + (Number(proveedor.calificacionPromedio) || 0);
+    }, 0);
+    return (suma / proveedores.length).toFixed(1);
+  }, [proveedores]);
+
+  const totalReseniasGlobal = useMemo(() => {
+    return proveedores.reduce((acumulado, proveedor) => {
+      return acumulado + (Number(proveedor.totalResenas) || 0);
+    }, 0);
+  }, [proveedores]);
 
   const proveedoresFiltrados = useMemo(() => {
     let resultado = proveedores.map((proveedor) => {
-      const stats = estadisticasCalificacion[proveedor.id] || { totalPuntos: 0, cantidad: 0 };
-      const promedioCalificacion = stats.cantidad ? stats.totalPuntos / stats.cantidad : 0;
+      // Usar datos sincronizados del usuario
+      const calificacionPromedio = Number(proveedor.calificacionPromedio) || 0;
+      const totalCalificaciones = Number(proveedor.totalResenas) || 0;
       const totalProyectosAsignados = estadisticasProyectosProveedor[proveedor.id] || 0;
+      const totalProyectosTerminados = Number(proveedor.totalProyectosTerminados) || 0;
 
       return {
         ...proveedor,
-        totalCalificaciones: stats.cantidad,
-        promedioCalificacion,
+        totalCalificaciones,
+        promedioCalificacion: calificacionPromedio,
         totalProyectosAsignados,
+        totalProyectosTerminados,
         departamentosProveedor: normalizarEspecialidades(
           proveedor.especialidadesProveedor || proveedor.departamentosProveedor || []
         ),
@@ -241,12 +268,17 @@ function ProveedoresAdminPage() {
 
     return resultado
       .sort((a, b) => {
+        // Ordenar por: calificación, reseñas, proyectos terminados, proyectos asignados, clasificación
         if (b.promedioCalificacion !== a.promedioCalificacion) {
           return b.promedioCalificacion - a.promedioCalificacion;
         }
 
         if (b.totalCalificaciones !== a.totalCalificaciones) {
           return b.totalCalificaciones - a.totalCalificaciones;
+        }
+
+        if (b.totalProyectosTerminados !== a.totalProyectosTerminados) {
+          return b.totalProyectosTerminados - a.totalProyectosTerminados;
         }
 
         if (b.totalProyectosAsignados !== a.totalProyectosAsignados) {
@@ -262,7 +294,7 @@ function ProveedoresAdminPage() {
         ...proveedor,
         posicionRanking: indice + 1,
       }));
-  }, [proveedores, estadisticasCalificacion, estadisticasProyectosProveedor, filtroClasificacion]);
+  }, [proveedores, estadisticasProyectosProveedor, filtroClasificacion]);
 
   const proveedorTop = proveedoresFiltrados[0] || null;
 
@@ -320,7 +352,7 @@ function ProveedoresAdminPage() {
           </div>
           <div className="card-resumen">
             <div className="card-header">TOTAL RESEÑAS</div>
-            <div className="card-numero">{calificaciones.length}</div>
+            <div className="card-numero">{totalReseniasGlobal}</div>
           </div>
           <div className="card-resumen">
             <div className="card-header">TOP ACTUAL</div>
@@ -333,6 +365,13 @@ function ProveedoresAdminPage() {
         <div className="lista-contenedor">
           <div className="lista-header">
             <h2>Ranking de Proveedores</h2>
+            <button 
+              className="btn-ver"
+              onClick={() => cargarProveedores()}
+              style={{ padding: "8px 16px", fontSize: "14px" }}
+            >
+              🔄 Actualizar
+            </button>
             <div className="filtros-estado">
               <button
                 className={`filtro-btn ${filtroClasificacion === "todos" ? "activo" : ""}`}
@@ -377,6 +416,7 @@ function ProveedoresAdminPage() {
                     <th>CALIFICACION</th>
                     <th>RESEÑAS</th>
                     <th>PROYECTOS</th>
+                    <th>TERMINADOS</th>
                     <th>CLASIFICACION</th>
                     <th>DEPARTAMENTOS</th>
                     <th>ACTUALIZADO</th>
@@ -410,6 +450,11 @@ function ProveedoresAdminPage() {
                         <td>{proveedor.promedioCalificacion ? proveedor.promedioCalificacion.toFixed(1) : "-"}</td>
                         <td>{proveedor.totalCalificaciones || 0}</td>
                         <td>{proveedor.totalProyectosAsignados || 0}</td>
+                        <td>
+                          <span style={{ color: "#10b981", fontWeight: "bold" }}>
+                            {proveedor.totalProyectosTerminados || 0}
+                          </span>
+                        </td>
                         <td>
                           <span
                             className={`badge ${obtenerBadgeClaseClasificacion(proveedor.clasificacionProveedor)}`}

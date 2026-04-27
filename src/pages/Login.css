@@ -1,31 +1,20 @@
-<<<<<<< HEAD
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');
 
-=======
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 .login-bg {
   min-height: 100vh;
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-<<<<<<< HEAD
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-=======
   background:
     radial-gradient(circle at 8% 8%, rgba(209, 102, 63, 0.22), transparent 28%),
     radial-gradient(circle at 92% 10%, rgba(25, 143, 145, 0.22), transparent 30%),
     linear-gradient(160deg, #fffaf0 0%, #ffe8cd 100%);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
   background-attachment: fixed;
   background-size: cover;
   background-position: center;
   position: relative;
   overflow: hidden;
-<<<<<<< HEAD
-  font-family: 'Lora', Georgia, serif;
-=======
   font-family: "Urbanist", "Segoe UI", sans-serif;
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 }
 
 /* Capa de imagen de fondo (lado izquierdo) */
@@ -39,21 +28,6 @@
   background-image: url('../../public/fondo-login.png');
   background-size: cover;
   background-position: center;
-<<<<<<< HEAD
-  z-index: 1;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  
-  background: rgba(80, 90, 110, 0.75);
-  backdrop-filter: blur(5px);
-  border: none;
-  border-radius: 0;
-  padding: 48px 40px;
-  box-shadow: -2px 0 20px rgba(0, 0, 0, 0.1);
-=======
   opacity: 0.42;
   z-index: 1;
 }
@@ -75,7 +49,6 @@
   border-radius: 18px 0 0 18px;
   padding: 48px 40px;
   box-shadow: -10px 0 28px rgba(35, 27, 19, 0.28);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
   margin: 0;
   position: relative;
   z-index: 2;
@@ -99,30 +72,18 @@
 
 .logo {
   margin: -200px 0 8px 0;
-<<<<<<< HEAD
-  font-size: 36px;
-  text-align: center;
-  color: #ffffff;
-  font-weight: 500;
-  letter-spacing: -1px;
-=======
   font-family: "Space Grotesk", "Urbanist", sans-serif;
   font-size: 40px;
   text-align: center;
   color: #fff4e4;
   font-weight: 700;
   letter-spacing: -0.03em;
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 }
 
 .subtitle {
   margin: 0 0 80px 0;
   text-align: center;
-<<<<<<< HEAD
-  color: rgba(255, 255, 255, 0.85);
-=======
   color: rgba(255, 241, 223, 0.9);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
   font-size: 15px;
   font-weight: 500;
 }
@@ -132,11 +93,7 @@
   align-items: center;
   gap: 12px;
   border: none;
-<<<<<<< HEAD
-  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-=======
   border-bottom: 2px solid rgba(255, 231, 207, 0.48);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
   border-radius: 0;
   padding: 14px 0;
   margin-bottom: 28px;
@@ -145,22 +102,13 @@
 }
 
 .input-group:focus-within {
-<<<<<<< HEAD
-  border-bottom-color: rgba(255, 255, 255, 1);
-  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
-=======
   border-bottom-color: rgba(255, 216, 181, 1);
   box-shadow: 0 2px 0 rgba(255, 216, 181, 0.5);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 }
 
 .icon {
   font-size: 18px;
-<<<<<<< HEAD
-  color: rgba(255, 255, 255, 0.7);
-=======
   color: rgba(255, 230, 200, 0.76);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 }
 
 .input-group input {
@@ -169,20 +117,12 @@
   outline: none;
   font-size: 16px;
   background: transparent;
-<<<<<<< HEAD
-  color: #ffffff;
-=======
   color: #fff8ee;
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
   font-weight: 500;
 }
 
 .input-group input::placeholder {
-<<<<<<< HEAD
-  color: rgba(255, 255, 255, 0.6);
-=======
   color: rgba(255, 231, 207, 0.64);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 }
 
 .login-btn {
@@ -192,33 +132,19 @@
   padding: 14px 16px;
   cursor: pointer;
   color: #ffffff;
-<<<<<<< HEAD
-  background: rgba(255, 255, 255, 0.2);
-=======
   background: linear-gradient(120deg, var(--terracotta-500), #e48859);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
   font-weight: 700;
   margin-top: 16px;
   font-size: 15px;
   transition: all 0.3s ease;
-<<<<<<< HEAD
-  border: 1px solid rgba(255, 255, 255, 0.3);
-=======
   border: 1px solid rgba(255, 234, 214, 0.45);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 }
 
 .login-btn:hover {
   transform: translateY(-2px);
-<<<<<<< HEAD
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-=======
   filter: brightness(1.05);
   border-color: rgba(255, 234, 214, 0.65);
   box-shadow: 0 8px 20px rgba(185, 80, 45, 0.36);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
 }
 
 .login-btn:active {
@@ -235,11 +161,7 @@
   margin: 24px 0 0 0;
   text-align: center;
   font-size: 13px;
-<<<<<<< HEAD
-  color: rgba(255, 255, 255, 0.9);
-=======
   color: rgba(255, 238, 218, 0.94);
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
   min-height: 16px;
   line-height: 1.4;
 }

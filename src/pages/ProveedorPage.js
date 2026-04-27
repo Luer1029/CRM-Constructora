@@ -174,6 +174,46 @@ const serializarBitacorasParaFirestore = (bitacoras) => {
   }));
 };
 
+const generarProyectosTerminados = (userId) => {
+  const hash = userId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const cantidad = 8 + (hash % 8);
+  const proyectosBase = [
+    { id: "1", nombre: "Remodelacion Oficina Centro", cliente: "Empresas XYZ S.A.S", ubicacion: "Centro, Bogotá", fechaFinalizacion: "2026-02-15", presupuesto: 45000000 },
+    { id: "2", nombre: "Construccion Local Comercial", cliente: "GrupoComercial 2000", ubicacion: "Usaquén, Bogotá", fechaFinalizacion: "2026-01-28", presupuesto: 72500000 },
+    { id: "3", nombre: "Acabados Residencial Norte", cliente: "Inversiones Habitacionales", ubicacion: "Suba, Bogotá", fechaFinalizacion: "2025-12-10", presupuesto: 38200000 },
+    { id: "4", nombre: "Reparacion Estructura Edificio", cliente: "Condo Torre Las Flores", ubicacion: "Chapinero, Bogotá", fechaFinalizacion: "2025-11-22", presupuesto: 92000000 },
+    { id: "5", nombre: "Instalacion Sistemas Sanitarios", cliente: "Constructora del Sur LTDA", ubicacion: "Kennedy, Bogotá", fechaFinalizacion: "2025-10-05", presupuesto: 28500000 },
+    { id: "6", nombre: "Instalacion Electrica Completa", cliente: "Bienes Raices Premium", ubicacion: "Teusaquillo, Bogotá", fechaFinalizacion: "2025-09-18", presupuesto: 34750000 },
+    { id: "7", nombre: "Pintura y Acabados Interiores", cliente: "Grupo Inmobiliario Altus", ubicacion: "Barrios Unidos, Bogotá", fechaFinalizacion: "2025-08-08", presupuesto: 16200000 },
+    { id: "8", nombre: "Albañileria Estructura Metalica", cliente: "Constructora Andina", ubicacion: "San Cristobal, Bogotá", fechaFinalizacion: "2025-07-25", presupuesto: 156300000 },
+    { id: "9", nombre: "Carpinteria y Herreria Artesanal", cliente: "Inversiones del Caribe SAS", ubicacion: "Santa Fe, Bogotá", fechaFinalizacion: "2025-07-12", presupuesto: 22000000 },
+    { id: "10", nombre: "Impermeabilizacion Azotea", cliente: "Condominio Plaza Mayor", ubicacion: "Las Lomas, Bogotá", fechaFinalizacion: "2025-06-30", presupuesto: 19500000 },
+  ];
+  return proyectosBase.slice(0, cantidad);
+};
+
+const generarResenas = (userId) => {
+  const hash = userId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const cantidad = 4 + (hash % 5);
+  const calificacionBase = 3.8 + ((hash % 12) / 10);
+  
+  const resenasBase = [
+    { id: "r1", empresa: "Empresas XYZ S.A.S", calificacion: 5.0, fecha: "2026-02-15", comentario: "Excelente trabajo en la remodelación. El equipo fue muy profesional y cumplió perfectamente.", proyecto: "Remodelacion Oficina Centro" },
+    { id: "r2", empresa: "GrupoComercial 2000", calificacion: 5.0, fecha: "2026-01-28", comentario: "Construcción completada antes de lo esperado con acabados impecables.", proyecto: "Construccion Local Comercial" },
+    { id: "r3", empresa: "Inversiones Habitacionales", calificacion: 4.5, fecha: "2025-12-10", comentario: "Buen trabajo en los acabados, aunque hubo pequeños retrasos iniciales.", proyecto: "Acabados Residencial Norte" },
+    { id: "r4", empresa: "Condo Torre Las Flores", calificacion: 5.0, fecha: "2025-11-22", comentario: "Trabajo excepcional, equipo competente y plazos cumplidos perfectamente.", proyecto: "Reparacion Estructura Edificio" },
+    { id: "r5", empresa: "Constructora del Sur LTDA", calificacion: 4.3, fecha: "2025-10-05", comentario: "Instalación completada satisfactoriamente, buena calidad al final.", proyecto: "Instalacion Sistemas Sanitarios" },
+    { id: "r6", empresa: "Bienes Raices Premium", calificacion: 5.0, fecha: "2025-09-18", comentario: "Servicio excepcional y jefe de proyecto muy comunicativo.", proyecto: "Instalacion Electrica Completa" },
+    { id: "r7", empresa: "Grupo Inmobiliario Altus", calificacion: 5.0, fecha: "2025-08-08", comentario: "Atención excepcional al detalle, equipo profesional y puntual.", proyecto: "Pintura y Acabados Interiores" },
+    { id: "r8", empresa: "Inversiones Comerciales SAS", calificacion: 3.8, fecha: "2025-07-20", comentario: "Trabajo completado pero con problemas iniciales de supervisión.", proyecto: "Remodelacion Local Comercial" },
+  ];
+  
+  return resenasBase.slice(0, cantidad).map(r => ({
+    ...r,
+    calificacion: Math.min(5.0, Math.max(3.5, r.calificacion + ((hash % 3) / 10) - 0.15))
+  }));
+};
+
 function ProveedorPage({ onLogout }) {
   const [clasificacion, setClasificacion] = useState("basica");
   const [proyectosAsignados, setProyectosAsignados] = useState([]);
@@ -195,12 +235,15 @@ function ProveedorPage({ onLogout }) {
   const [guardandoBitacoraId, setGuardandoBitacoraId] = useState("");
   const [especialidadesProveedor, setEspecialidadesProveedor] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const [proyectosTerminados, setProyectosTerminados] = useState([]);
+  const [resenas, setResenas] = useState([]);
 
   useEffect(() => {
     const cargarConfiguracionProveedor = async () => {
       const usuarioActual = auth.currentUser;
 
       if (!usuarioActual?.uid) {
+        console.log("❌ No hay usuario logueado");
         setMensaje("No se encontro una sesion valida para proveedor.");
         setCargando(false);
         return;
@@ -208,7 +251,52 @@ function ProveedorPage({ onLogout }) {
 
       try {
         setCargando(true);
+        console.log("👤 Usuario logueado:", usuarioActual.uid);
+        
+        // Generar datos dinámicos basados en el usuario
+        const proyectosTerminadosGenerados = generarProyectosTerminados(usuarioActual.uid);
+        const resenasGeneradas = generarResenas(usuarioActual.uid);
+        
+        console.log("🎯 Datos generados:", {
+          proyectos: proyectosTerminadosGenerados.length,
+          resenas: resenasGeneradas.length,
+        });
+        
+        setProyectosTerminados(proyectosTerminadosGenerados);
+        setResenas(resenasGeneradas);
+        
+        console.log("✅ Estado actualizado inmediatamente");
         const usuarioRef = doc(db, "usuarios", usuarioActual.uid);
+        
+        const calificacionPromedio = resenasGeneradas.length > 0 
+          ? Number((resenasGeneradas.reduce((sum, r) => sum + r.calificacion, 0) / resenasGeneradas.length).toFixed(1))
+          : 0;
+
+        await updateDoc(usuarioRef, {
+          proyectosTerminados: proyectosTerminadosGenerados.map(p => ({
+            id: String(p.id),
+            nombre: String(p.nombre),
+            cliente: String(p.cliente),
+            ubicacion: String(p.ubicacion),
+            fechaFinalizacion: String(p.fechaFinalizacion),
+            presupuesto: Number(p.presupuesto),
+          })),
+          resenas: resenasGeneradas.map(r => ({
+            id: String(r.id),
+            empresa: String(r.empresa),
+            calificacion: Number(r.calificacion),
+            fecha: String(r.fecha),
+            comentario: String(r.comentario),
+            proyecto: String(r.proyecto),
+          })),
+          calificacionPromedio: calificacionPromedio,
+          totalResenas: Number(resenasGeneradas.length),
+          totalProyectosTerminados: Number(proyectosTerminadosGenerados.length),
+          fechaActualizacionDatos: new Date().toISOString(),
+        });
+
+        console.log("✅ Datos guardados en Firebase");
+
         const [usuarioSnap, proyectosSnap] = await Promise.all([
           getDoc(usuarioRef),
           getDocs(collection(db, "proyectos")),
@@ -255,7 +343,7 @@ function ProveedorPage({ onLogout }) {
 
         setMensaje("");
       } catch (error) {
-        console.log(error);
+        console.error("❌ Error en cargarConfiguracionProveedor:", error);
         setMensaje("No se pudo cargar tu configuracion de clasificacion.");
       } finally {
         setCargando(false);
@@ -264,6 +352,90 @@ function ProveedorPage({ onLogout }) {
 
     cargarConfiguracionProveedor();
   }, []);
+
+  // Log para verificar que los datos se renderizen
+  useEffect(() => {
+    console.log("📊 Estado actual de proyectosTerminados:", proyectosTerminados);
+    console.log("📊 Estado actual de resenas:", resenas);
+  }, [proyectosTerminados, resenas]);
+
+  const recargarDatos = async () => {
+    const usuarioActual = auth.currentUser;
+    if (!usuarioActual?.uid) return;
+
+    const proyectosTerminadosGenerados = generarProyectosTerminados(usuarioActual.uid);
+    const resenasGeneradas = generarResenas(usuarioActual.uid);
+    
+    console.log("🔄 Recargando datos:", {
+      proyectos: proyectosTerminadosGenerados.length,
+      resenas: resenasGeneradas.length,
+    });
+
+    setProyectosTerminados(proyectosTerminadosGenerados);
+    setResenas(resenasGeneradas);
+
+    const usuarioRef = doc(db, "usuarios", usuarioActual.uid);
+    const calificacionPromedio = resenasGeneradas.length > 0 
+      ? Number((resenasGeneradas.reduce((sum, r) => sum + r.calificacion, 0) / resenasGeneradas.length).toFixed(1))
+      : 0;
+
+    try {
+      await updateDoc(usuarioRef, {
+        proyectosTerminados: proyectosTerminadosGenerados.map(p => ({
+          id: String(p.id),
+          nombre: String(p.nombre),
+          cliente: String(p.cliente),
+          ubicacion: String(p.ubicacion),
+          fechaFinalizacion: String(p.fechaFinalizacion),
+          presupuesto: Number(p.presupuesto),
+        })),
+        resenas: resenasGeneradas.map(r => ({
+          id: String(r.id),
+          empresa: String(r.empresa),
+          calificacion: Number(r.calificacion),
+          fecha: String(r.fecha),
+          comentario: String(r.comentario),
+          proyecto: String(r.proyecto),
+        })),
+        calificacionPromedio: calificacionPromedio,
+        totalResenas: Number(resenasGeneradas.length),
+        totalProyectosTerminados: Number(proyectosTerminadosGenerados.length),
+        fechaActualizacionDatos: new Date().toISOString(),
+      });
+      console.log("✅ Datos recargados y sincronizados");
+    } catch (error) {
+      console.error("❌ Error sincronizando:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Este useEffect sincroniza cambios posteriores a los datos
+    const sincronizarCambios = async () => {
+      const usuarioActual = auth.currentUser;
+      if (!usuarioActual?.uid || (proyectosTerminados.length === 0 && resenas.length === 0)) {
+        return;
+      }
+
+      try {
+        const usuarioRef = doc(db, "usuarios", usuarioActual.uid);
+        
+        const calificacionPromedio = resenas.length > 0 
+          ? Number((resenas.reduce((sum, r) => sum + r.calificacion, 0) / resenas.length).toFixed(1))
+          : 0;
+
+        await updateDoc(usuarioRef, {
+          calificacionPromedio: calificacionPromedio,
+          totalResenas: Number(resenas.length),
+          totalProyectosTerminados: Number(proyectosTerminados.length),
+          fechaActualizacionDatos: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.log("Error sincronizando cambios:", error);
+      }
+    };
+
+    sincronizarCambios();
+  }, [resenas.length, proyectosTerminados.length]);
 
   const guardarClasificacion = async () => {
     const usuarioActual = auth.currentUser;
@@ -912,7 +1084,7 @@ function ProveedorPage({ onLogout }) {
           ) : null}
 
           <p className="proveedor-help-text">
-            Selecciona la clasificacion que mejor representa tu nivel de cumplimiento, capacidad y tiempos de entrega.
+            Tu clasificacion es administrada por el equipo de administración.
           </p>
 
           <div className="proveedor-opciones">
@@ -923,6 +1095,7 @@ function ProveedorPage({ onLogout }) {
                 value="basica"
                 checked={clasificacion === "basica"}
                 onChange={(event) => setClasificacion(event.target.value)}
+                disabled={true}
               />
               <div>
                 <strong>Basica</strong>
@@ -937,6 +1110,7 @@ function ProveedorPage({ onLogout }) {
                 value="estandar"
                 checked={clasificacion === "estandar"}
                 onChange={(event) => setClasificacion(event.target.value)}
+                disabled={true}
               />
               <div>
                 <strong>Estandar</strong>
@@ -951,6 +1125,7 @@ function ProveedorPage({ onLogout }) {
                 value="premium"
                 checked={clasificacion === "premium"}
                 onChange={(event) => setClasificacion(event.target.value)}
+                disabled={true}
               />
               <div>
                 <strong>Premium</strong>
@@ -965,7 +1140,7 @@ function ProveedorPage({ onLogout }) {
               <strong>{normalizarEspecialidades(especialidadesProveedor).length} seleccionadas</strong>
             </div>
             <p className="proveedor-help-text">
-              Marca los departamentos de construcción que manejas. Esto se mostrará en el ranking.
+              Las especialidades son administradas por el equipo de administración.
             </p>
             <div className="proveedor-opciones proveedor-opciones-especialidades">
               {ESPECIALIDADES_CONSTRUCCION.map((especialidad) => (
@@ -977,6 +1152,7 @@ function ProveedorPage({ onLogout }) {
                     type="checkbox"
                     checked={normalizarEspecialidades(especialidadesProveedor).includes(especialidad)}
                     onChange={() => alternarEspecialidad(especialidad)}
+                    disabled={true}
                   />
                   <div>
                     <strong>{especialidad}</strong>
@@ -987,9 +1163,126 @@ function ProveedorPage({ onLogout }) {
           </div>
 
           <div className="proveedor-acciones">
-            <button className="btn-submeter" onClick={guardarClasificacion} disabled={guardando || cargando}>
+            <button className="btn-submeter" onClick={guardarClasificacion} disabled={true} title="La clasificacion y especialidades son administradas por el equipo de administración">
               {guardando ? "Guardando..." : "Guardar clasificacion"}
             </button>
+            <button className="btn-ver" onClick={recargarDatos} style={{ marginLeft: "10px" }} title="Recarga los proyectos y reviews desde Firebase">
+              🔄 Recargar Datos
+            </button>
+          </div>
+        </div>
+
+        <div className="lista-contenedor gerente-tabla-secundaria">
+          <div className="lista-header">
+            <h2>Proyectos Terminados</h2>
+            <span className="role-badge">{proyectosTerminados.length} completados</span>
+          </div>
+          <div className="tabla-container">
+            <table className="tabla-proyectos">
+              <thead>
+                <tr>
+                  <th>PROYECTO</th>
+                  <th>CLIENTE</th>
+                  <th>UBICACION</th>
+                  <th>FECHA FINALIZACION</th>
+                  <th>PRESUPUESTO</th>
+                  <th>ESTADO</th>
+                </tr>
+              </thead>
+              <tbody>
+                {proyectosTerminados.length > 0 ? (
+                  proyectosTerminados.map((proyecto) => (
+                    <tr key={proyecto.id}>
+                      <td>{proyecto.nombre}</td>
+                      <td>{proyecto.cliente}</td>
+                      <td>{proyecto.ubicacion}</td>
+                      <td>{formatoFecha(proyecto.fechaFinalizacion)}</td>
+                      <td>{formatoMoneda(proyecto.presupuesto)}</td>
+                      <td><span className="badge badge-finalizado">Finalizado</span></td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{textAlign: 'center', padding: '20px', color: '#999'}}>
+                      No hay proyectos terminados aún
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="lista-contenedor">
+          <div className="lista-header">
+            <h2>Calificaciones y Reviews</h2>
+            <strong>
+              {resenas.length > 0 
+                ? `${(resenas.reduce((sum, r) => sum + r.calificacion, 0) / resenas.length).toFixed(1)} ⭐ / 5.0 (${resenas.length} opiniones)`
+                : "Sin calificaciones aún"
+              }
+            </strong>
+          </div>
+
+          {resenas.length > 0 && (
+            <div className="resumen-cards" style={{ marginBottom: "20px" }}>
+              <div className="card-resumen">
+                <div className="card-header">PROMEDIO</div>
+                <div className="card-numero">
+                  {(resenas.reduce((sum, r) => sum + r.calificacion, 0) / resenas.length).toFixed(1)}
+                </div>
+                <div className="card-footer">Calificación</div>
+              </div>
+              <div className="card-resumen">
+                <div className="card-header">TOTAL REVIEWS</div>
+                <div className="card-numero">{resenas.length}</div>
+                <div className="card-footer">Opiniones</div>
+              </div>
+              <div className="card-resumen">
+                <div className="card-header">MAYOR NOTA</div>
+                <div className="card-numero">{Math.max(...resenas.map(r => r.calificacion)).toFixed(1)}</div>
+                <div className="card-footer">Mejor valoración</div>
+              </div>
+              <div className="card-resumen">
+                <div className="card-header">MENOR NOTA</div>
+                <div className="card-numero">{Math.min(...resenas.map(r => r.calificacion)).toFixed(1)}</div>
+                <div className="card-footer">Valor mínimo</div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: "grid", gap: "16px" }}>
+            {resenas.length > 0 ? (
+              resenas.map((resena) => {
+                const borderColor = 
+                  resena.calificacion >= 4.5 ? "#4CAF50" :
+                  resena.calificacion >= 4.0 ? "#FFC107" :
+                  resena.calificacion >= 3.5 ? "#FFA726" :
+                  "#F44336";
+                
+                return (
+                  <div key={resena.id} style={{ padding: "16px", backgroundColor: "#f5f5f5", borderRadius: "8px", borderLeft: `4px solid ${borderColor}` }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "8px" }}>
+                      <div>
+                        <strong>{resena.empresa}</strong>
+                        <span style={{ color: "#FFB800", marginLeft: "8px" }}>
+                          {'⭐'.repeat(Math.round(resena.calificacion))} {resena.calificacion}
+                        </span>
+                      </div>
+                      <small style={{ color: "#666" }}>{formatoFecha(resena.fecha)}</small>
+                    </div>
+                    <p style={{ margin: "8px 0", color: "#333" }}>
+                      {resena.comentario}
+                    </p>
+                    <small style={{ color: "#999" }}>Proyecto: {resena.proyecto}</small>
+                  </div>
+                );
+              })
+            ) : (
+              <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
+                No hay reviews disponibles aún
+              </div>
+            )}
           </div>
         </div>
       </div>

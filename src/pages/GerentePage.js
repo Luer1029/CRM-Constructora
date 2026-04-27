@@ -1,16 +1,4 @@
 import "./RolePage.css";
-<<<<<<< HEAD
-
-function GerentePage() {
-  return (
-    <div className="role-bg">
-      <div className="role-card">
-        <h2 className="role-header">Panel Gerente</h2>
-        <div className="role-content">
-          <p className="role-message">Bienvenido al sistema CRM Constructora.</p>
-          <span className="role-badge">Rol: Gerente</span>
-        </div>
-=======
 import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "../firebase";
@@ -457,7 +445,6 @@ function GerentePage({ onLogout }) {
             )}
           </>
         )}
->>>>>>> 64fc3cd65206f614c841b9b192cebb2d4925c1e1
       </div>
     </div>
   );
