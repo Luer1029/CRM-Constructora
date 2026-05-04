@@ -75,8 +75,7 @@ function ProveedoresAdminPage() {
 
       const usuariosSnapshot = usuariosResult.status === "fulfilled" ? usuariosResult.value : null;
       const proyectosSnapshot = proyectosResult.status === "fulfilled" ? proyectosResult.value : null;
-      const calificacionesSnapshot =
-        calificacionesResult.status === "fulfilled" ? calificacionesResult.value : null;
+      
 
       const listaProveedores = (usuariosSnapshot?.docs || [])
         .map((documento) => ({
