@@ -192,18 +192,6 @@ export const generarResumenEstadosProyectosPdf = ({
     area: "Administracion",
   });
 
-  // Clasificar proyectos por estado
-  const proyectosPorEstado = proyectos.reduce(
-    (acc, proyecto) => {
-      const estado = (proyecto.estado || "Sin estado").toLowerCase();
-      if (!acc[estado]) {
-        acc[estado] = [];
-      }
-      acc[estado].push(proyecto);
-      return acc;
-    },
-    {}
-  );
 
   // Resumen estadístico
   const estadosClave = {

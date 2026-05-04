@@ -31,17 +31,6 @@ const normalizarEspecialidades = (valor) => {
   return [];
 };
 
-const formatoMoneda = (valor) => {
-  const numero = Number(valor);
-  if (Number.isNaN(numero) || numero <= 0) return "No definido";
-
-  return numero.toLocaleString("es-CO", {
-    style: "currency",
-    currency: "COP",
-    maximumFractionDigits: 0,
-  });
-};
-
 const formatoFecha = (valor) => {
   if (!valor) return "No definida";
 

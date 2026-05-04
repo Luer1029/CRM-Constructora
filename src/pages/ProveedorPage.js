@@ -404,7 +404,7 @@ function ProveedorPage({ onLogout }) {
     };
 
     sincronizarCambios();
-  }, [resenas.length, proyectosTerminados.length]);
+  }, [resenas, proyectosTerminados]);
 
   const guardarClasificacion = async () => {
     const usuarioActual = auth.currentUser;

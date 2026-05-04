@@ -185,44 +185,12 @@ function ProveedoresAdminPage() {
     };
   }, [proveedores]);
 
-  const estadisticasCalificacion = useMemo(() => {
-    return calificaciones.reduce((acc, item) => {
-      const proveedorId = item.proveedorId;
-      if (!proveedorId) return acc;
-
-      if (!acc[proveedorId]) {
-        acc[proveedorId] = { totalPuntos: 0, cantidad: 0 };
-      }
-
-      acc[proveedorId].totalPuntos += Number(item.puntaje) || 0;
-      acc[proveedorId].cantidad += 1;
-
-      return acc;
-    }, {});
-  }, [calificaciones]);
-
   const estadisticasProyectosProveedor = useMemo(() => {
     return proyectos.reduce((acc, proyecto) => {
       const proveedorId = proyecto.proveedorId;
       if (!proveedorId) return acc;
 
       acc[proveedorId] = (acc[proveedorId] || 0) + 1;
-      return acc;
-    }, {});
-  }, [proyectos]);
-
-  const estadisticasProyectosTerminados = useMemo(() => {
-    return proyectos.reduce((acc, proyecto) => {
-      const proveedorId = proyecto.proveedorId;
-      if (!proveedorId) return acc;
-
-      const estado = normalizarTexto(proyecto.estado);
-      const esTerminado = estado === "finalizado";
-
-      if (esTerminado) {
-        acc[proveedorId] = (acc[proveedorId] || 0) + 1;
-      }
-
       return acc;
     }, {});
   }, [proyectos]);

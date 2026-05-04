@@ -40,13 +40,6 @@ const formatoFechaCorta = (fechaTexto) => {
   return fecha.toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
 };
 
-const formatoMes = (fechaTexto) => {
-  if (!fechaTexto) return "Sin fecha";
-  const fecha = new Date(fechaTexto);
-  if (Number.isNaN(fecha.getTime())) return "Sin fecha";
-  return fecha.toLocaleDateString("es-ES", { month: "short", year: "2-digit" });
-};
-
 const obtenerClaveEstado = (estado) => {
   const valor = normalizar(estado);
   if (valor === "activo" || valor === "en progreso") return "En progreso";
