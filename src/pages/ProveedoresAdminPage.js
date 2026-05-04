@@ -93,11 +93,6 @@ function ProveedoresAdminPage() {
         }))
         .filter((proyecto) => !proyecto.oculto);
 
-      const calificacionesNormalizadas = (calificacionesSnapshot?.docs || []).map((documento) => ({
-        id: documento.id,
-        ...documento.data(),
-      }));
-
       setProveedores(listaProveedores);
       setProyectos(listaProyectos);
       setAsignaciones(
