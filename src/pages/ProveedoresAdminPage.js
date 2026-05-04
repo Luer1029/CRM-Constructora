@@ -63,7 +63,7 @@ function ProveedoresAdminPage() {
   const cargarProveedores = async () => {
     try {
       setCargando(true);
-      const [usuariosResult, proyectosResult, calificacionesResult] = await Promise.allSettled([
+      const [usuariosResult, proyectosResult] = await Promise.allSettled([
         getDocs(collection(db, "usuarios")),
         getDocs(collection(db, "proyectos")),
         getDocs(collection(db, "calificacionesProveedores")),
