@@ -51,7 +51,6 @@ const obtenerClaseEstadoProyecto = (estado) => {
 function ProveedoresAdminPage() {
   const [proveedores, setProveedores] = useState([]);
   const [proyectos, setProyectos] = useState([]);
-  const [calificaciones, setCalificaciones] = useState([]);
   const [asignaciones, setAsignaciones] = useState({});
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(true);
@@ -101,7 +100,6 @@ function ProveedoresAdminPage() {
 
       setProveedores(listaProveedores);
       setProyectos(listaProyectos);
-      setCalificaciones(calificacionesNormalizadas);
       setAsignaciones(
         listaProyectos.reduce((acc, proyecto) => {
           acc[proyecto.id] = proyecto.proveedorId || "";
