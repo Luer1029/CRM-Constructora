@@ -1,0 +1,105 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDocPath(uid) {
+      return /databases/$(database)/documents/usuarios/$(uid);
+    }
+
+    function currentUserExists() {
+      return signedIn() && exists(userDocPath(request.auth.uid));
+    }
+
+    function currentUserRole() {
+      return currentUserExists()
+        ? get(userDocPath(request.auth.uid)).data.rol
+        : null;
+    }
+
+    function isAdmin() {
+      return signedIn() && currentUserRole() == "administrador";
+    }
+
+    function isProjectCreator() {
+      return signedIn() && resource.data.creadoPor == request.auth.uid;
+    }
+
+    function isAssignedProvider() {
+      return signedIn() && resource.data.proveedorId == request.auth.uid;
+    }
+
+    match /usuarios/{userId} {
+      // Ver un usuario: dueño o admin
+      allow get: if signedIn() && (request.auth.uid == userId || isAdmin());
+
+      // Listar usuarios: solo admin
+      allow list: if isAdmin();
+
+      // Crear usuario: dueño o admin
+      allow create: if signedIn() && (request.auth.uid == userId || isAdmin());
+
+      // Editar/eliminar: dueño o admin
+      allow update, delete: if signedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /proyectos/{projectId} {
+      // Crear proyecto: autenticado y creadoPor debe ser el UID de la sesión
+      allow create: if signedIn()
+        && request.resource.data.creadoPor == request.auth.uid;
+
+      // Leer proyectos: autenticado
+      allow read: if signedIn();
+
+      // Actualizar:
+      // - admin o creador: cualquier campo
+      // - proveedor asignado: solo campos operativos permitidos
+      allow update: if signedIn() && (
+        isAdmin() ||
+        isProjectCreator() ||
+        (
+          isAssignedProvider() &&
+          request.resource.data.diff(resource.data).changedKeys()
+            .hasOnly([
+              "tareasObra",
+              "progreso",
+              "fechaActualizacionAvance",
+              "bitacorasObra",
+              "fechaActualizacionBitacora"
+            ])
+        )
+      );
+
+      // Borrar proyecto: solo admin o creador
+      allow delete: if signedIn() && (isAdmin() || isProjectCreator());
+    }
+
+    match /calificacionesProveedores/{calificacionId} {
+      // Crear calificación: el usuario solo crea su propia calificación
+      allow create: if signedIn()
+        && request.resource.data.usuarioId == request.auth.uid
+        && request.resource.data.proveedorId is string
+        && request.resource.data.proyectoId is string
+        && request.resource.data.puntaje is number
+        && request.resource.data.puntaje >= 1
+        && request.resource.data.puntaje <= 5;
+
+      // Leer: admin, cliente que calificó o proveedor calificado
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.usuarioId == request.auth.uid ||
+        resource.data.proveedorId == request.auth.uid
+      );
+
+      // Editar/eliminar: admin o cliente que creó la calificación
+      allow update, delete: if signedIn() && (
+        isAdmin() ||
+        resource.data.usuarioId == request.auth.uid
+      );
+    }
+  }
+}
