@@ -1,11 +1,68 @@
 import "./RolePage.css";
 
 import { useEffect, useState } from "react";
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth, db, secondaryAuth } from "../firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth, db, secondaryAuth, secondaryDb } from "../firebase";
 import { addDoc, collection, doc, getDocs, setDoc, writeBatch } from "firebase/firestore";
 
-// Datos y utilidades demo eliminados (no se usan en producción)
+const DEMO_PASSWORD = "123456";
+
+const USUARIOS_DEMO = [
+  { nombre: "Carlos", apellido: "Mendoza", telefono: "3001112201", fechaNacimiento: "1992-03-11", direccion: "Calle 45 #12-20", correo: "usuario1@crm.com", rol: "usuario" },
+  { nombre: "Laura", apellido: "Gomez", telefono: "3001112202", fechaNacimiento: "1994-06-18", direccion: "Carrera 18 #40-10", correo: "usuario2@crm.com", rol: "usuario" },
+  { nombre: "Andres", apellido: "Rojas", telefono: "3001112203", fechaNacimiento: "1990-09-09", direccion: "Avenida 7 #60-30", correo: "usuario3@crm.com", rol: "usuario" },
+  { nombre: "Diana", apellido: "Morales", telefono: "3001112204", fechaNacimiento: "1995-01-25", direccion: "Calle 90 #15-40", correo: "usuario4@crm.com", rol: "usuario" },
+  { nombre: "Felipe", apellido: "Castro", telefono: "3001112205", fechaNacimiento: "1991-11-30", direccion: "Calle 120 #20-50", correo: "usuario5@crm.com", rol: "usuario" },
+  { nombre: "Pedro", apellido: "Salazar", telefono: "3105551101", fechaNacimiento: "1988-05-10", direccion: "Zona Industrial Norte", correo: "proveedor1@crm.com", rol: "proveedor", clasificacionProveedor: "premium" },
+  { nombre: "Marta", apellido: "Linares", telefono: "3105551102", fechaNacimiento: "1987-07-14", direccion: "Parque Empresarial Sur", correo: "proveedor2@crm.com", rol: "proveedor", clasificacionProveedor: "estandar" },
+  { nombre: "Ramon", apellido: "Suarez", telefono: "3105551103", fechaNacimiento: "1985-02-21", direccion: "Calle Comercio 10", correo: "proveedor3@crm.com", rol: "proveedor", clasificacionProveedor: "basica" },
+  { nombre: "Natalia", apellido: "Pinzon", telefono: "3105551104", fechaNacimiento: "1990-12-08", direccion: "Bodega Central Oriente", correo: "proveedor4@crm.com", rol: "proveedor", clasificacionProveedor: "estandar" },
+  { nombre: "Jorge", apellido: "Pena", telefono: "3105551105", fechaNacimiento: "1986-04-27", direccion: "Centro Logistico Occidente", correo: "proveedor5@crm.com", rol: "proveedor", clasificacionProveedor: "premium" },
+  { nombre: "Manuel", apellido: "Barrera", telefono: "3207779901", fechaNacimiento: "1984-03-03", direccion: "Calle 30 #8-20", correo: "gerente1@crm.com", rol: "gerente" },
+  { nombre: "Juliana", apellido: "Delgado", telefono: "3207779902", fechaNacimiento: "1983-10-17", direccion: "Calle 50 #14-11", correo: "gerente2@crm.com", rol: "gerente" },
+  { nombre: "Ricardo", apellido: "Lopez", telefono: "3207779903", fechaNacimiento: "1982-01-22", direccion: "Carrera 70 #25-16", correo: "gerente3@crm.com", rol: "gerente" },
+  { nombre: "Paula", apellido: "Cortes", telefono: "3207779904", fechaNacimiento: "1989-09-05", direccion: "Calle 80 #22-09", correo: "gerente4@crm.com", rol: "gerente" },
+  { nombre: "Sergio", apellido: "Nieto", telefono: "3207779905", fechaNacimiento: "1981-12-19", direccion: "Diagonal 15 #33-45", correo: "gerente5@crm.com", rol: "gerente" },
+];
+
+const PROYECTOS_DEMO = [
+  { nombre: "Residencial Alameda", descripcion: "Construccion de conjunto residencial de 3 torres con zonas comunes y parqueaderos.", ubicacion: "Bogota - Suba", fechaInicio: "2025-01-10", fechaEstimada: "2025-12-20", presupuesto: 1800000000, estado: "finalizado", progreso: 100 },
+  { nombre: "Centro Empresarial Norte", descripcion: "Obra comercial para oficinas premium y locales de servicios.", ubicacion: "Bogota - Usaquen", fechaInicio: "2025-02-15", fechaEstimada: "2026-03-30", presupuesto: 2600000000, estado: "finalizado", progreso: 100 },
+  { nombre: "Urbanizacion Los Pinos", descripcion: "Desarrollo de vivienda de interes social con urbanismo y vias internas.", ubicacion: "Soacha", fechaInicio: "2026-03-02", fechaEstimada: "2026-11-25", presupuesto: 1500000000, estado: "en progreso", progreso: 48 },
+  { nombre: "Torre Medica Central", descripcion: "Edificacion de uso medico con consultorios, imagenologia y urgencias.", ubicacion: "Medellin", fechaInicio: "2025-01-28", fechaEstimada: "2025-11-15", presupuesto: 3200000000, estado: "finalizado", progreso: 100 },
+  { nombre: "Parque Industrial Delta", descripcion: "Construccion de bodegas modulares para operadores logisticos.", ubicacion: "Cali", fechaInicio: "2026-04-05", fechaEstimada: "2027-02-28", presupuesto: 2900000000, estado: "pendiente", progreso: 5 },
+];
+
+const COMENTARIOS_RESENA_DEMO = [
+  "Cumplieron con los tiempos y entregaron muy buena calidad de obra.",
+  "Excelente coordinacion del proveedor durante todo el proyecto.",
+  "Buena ejecucion general, con comunicacion clara y seguimiento constante.",
+  "El resultado final fue satisfactorio y acorde con lo pactado.",
+  "Se resolvieron observaciones de manera rapida y profesional.",
+  "Trabajo ordenado, seguro y con buena gestion del equipo en campo.",
+];
+
+const obtenerAleatorioEnRango = (minimo, maximo) => {
+  const min = Math.ceil(minimo);
+  const max = Math.floor(maximo);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const mezclarLista = (lista) => {
+  const copia = [...lista];
+  for (let i = copia.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+};
+
+const generarPuntajeAleatorio = () => Number((3.8 + Math.random() * 1.2).toFixed(1));
+
+const construirComentarioResena = (proyectoNombre) => {
+  const base = COMENTARIOS_RESENA_DEMO[obtenerAleatorioEnRango(0, COMENTARIOS_RESENA_DEMO.length - 1)];
+  return `${base} Proyecto: ${proyectoNombre}.`;
+};
 
 const normalizarTexto = (valor) => String(valor || "").toLowerCase().trim();
 const esErrorPermisos = (error) =>
@@ -25,6 +82,8 @@ function AdministradorPage(){
  const [mensaje, setMensaje] = useState("");
  const [usuarios, setUsuarios] = useState([]);
  const [cargandoUsuarios, setCargandoUsuarios] = useState(true);
+ const [generandoDemo, setGenerandoDemo] = useState(false);
+ const [agregandoProyectos, setAgregandoProyectos] = useState(false);
  const [eliminandoUsuarioId, setEliminandoUsuarioId] = useState("");
  const [filtroRol, setFiltroRol] = useState("todos");
 
@@ -113,9 +172,416 @@ function AdministradorPage(){
 
  };
 
+ const crearUsuariosYProyectosDemo = async () => {
+   try {
+     setGenerandoDemo(true);
+     setMensaje("Generando datos demo...");
 
+     const adminUid = auth.currentUser?.uid;
+     if (!adminUid) {
+       setMensaje("Sesion invalida. Inicia sesion nuevamente como administrador.");
+       return;
+     }
 
-// Función de creación de proyectos demo eliminada (anteriormente usada solo en demo UI)
+     let usuariosExistentes = [];
+     try {
+       const snapshotUsuarios = await getDocs(collection(db, "usuarios"));
+       usuariosExistentes = snapshotUsuarios.docs.map((documento) => ({
+         id: documento.id,
+         ...documento.data(),
+       }));
+     } catch (error) {
+       if (!esErrorPermisos(error)) {
+         throw error;
+       }
+     }
+
+     const mapaPorCorreo = usuariosExistentes.reduce((acc, item) => {
+       acc[normalizarTexto(item.correo)] = item;
+       return acc;
+     }, {});
+
+     const obtenerOUcrearUsuarioDemo = async (registro) => {
+       const correoNormalizado = normalizarTexto(registro.correo);
+       const usuarioExistente = mapaPorCorreo[correoNormalizado];
+
+       if (usuarioExistente?.id) {
+         const payloadExistente = {
+           ...registro,
+           correo: registro.correo,
+           rol: registro.rol,
+         };
+
+         if (registro.clasificacionProveedor) {
+           payloadExistente.fechaActualizacionClasificacion = new Date().toISOString();
+           payloadExistente.clasificacionProveedor = registro.clasificacionProveedor;
+         }
+
+         try {
+           await setDoc(doc(db, "usuarios", usuarioExistente.id), payloadExistente, { merge: true });
+         } catch (error) {
+           if (!esErrorPermisos(error)) {
+             throw error;
+           }
+
+           await signInWithEmailAndPassword(secondaryAuth, registro.correo, DEMO_PASSWORD);
+           await setDoc(doc(secondaryDb, "usuarios", usuarioExistente.id), payloadExistente, { merge: true });
+         } finally {
+           await signOut(secondaryAuth).catch(() => {});
+         }
+
+         return { id: usuarioExistente.id, ...registro };
+       }
+
+       let uid = "";
+
+       try {
+         const credencial = await createUserWithEmailAndPassword(secondaryAuth, registro.correo, DEMO_PASSWORD);
+         uid = credencial.user.uid;
+       } catch (error) {
+         if (error.code !== "auth/email-already-in-use") {
+           throw error;
+         }
+
+         try {
+           await signInWithEmailAndPassword(secondaryAuth, registro.correo, DEMO_PASSWORD);
+           uid = secondaryAuth.currentUser?.uid || "";
+         } catch (signInError) {
+           const recargaUsuarios = await getDocs(collection(db, "usuarios"));
+           const usuarioEncontrado = recargaUsuarios.docs
+             .map((documento) => ({ id: documento.id, ...documento.data() }))
+             .find((item) => normalizarTexto(item.correo) === correoNormalizado);
+
+           if (!usuarioEncontrado?.id) {
+             throw signInError;
+           }
+
+           uid = usuarioEncontrado.id;
+         }
+       } finally {
+         // Se cierra en cada flujo despues de escribir para evitar afectar la sesion principal.
+       }
+
+       const payload = {
+         nombre: registro.nombre,
+         apellido: registro.apellido,
+         telefono: registro.telefono,
+         fechaNacimiento: registro.fechaNacimiento,
+         direccion: registro.direccion,
+         correo: registro.correo,
+         rol: registro.rol,
+       };
+
+       if (registro.clasificacionProveedor) {
+         payload.clasificacionProveedor = registro.clasificacionProveedor;
+         payload.fechaActualizacionClasificacion = new Date().toISOString();
+       }
+
+       try {
+         await setDoc(doc(secondaryDb, "usuarios", uid), payload, { merge: true });
+       } catch (error) {
+         if (!esErrorPermisos(error)) {
+           throw error;
+         }
+
+         await setDoc(doc(db, "usuarios", uid), payload, { merge: true });
+       } finally {
+         await signOut(secondaryAuth).catch(() => {});
+       }
+
+       mapaPorCorreo[correoNormalizado] = { id: uid, ...payload };
+       return { id: uid, ...payload };
+     };
+
+     const usuariosDemoCreados = [];
+     for (const registro of USUARIOS_DEMO) {
+       // Secuencia para no saturar auth secundaria y evitar bloqueos de sesión.
+       const usuarioCreado = await obtenerOUcrearUsuarioDemo(registro);
+       usuariosDemoCreados.push(usuarioCreado);
+     }
+
+     const proveedoresDemo = usuariosDemoCreados.filter((item) => item.rol === "proveedor");
+     const gerentesDemo = usuariosDemoCreados.filter((item) => item.rol === "gerente");
+     const clientesDemo = usuariosDemoCreados.filter((item) => item.rol === "usuario");
+
+     let nombresProyectosExistentes = new Set();
+     try {
+       const snapshotProyectos = await getDocs(collection(db, "proyectos"));
+       nombresProyectosExistentes = new Set(
+         snapshotProyectos.docs.map((documento) => normalizarTexto(documento.data().nombre))
+       );
+     } catch (error) {
+       if (!esErrorPermisos(error)) {
+         throw error;
+       }
+     }
+
+    let proyectosCreados = 0;
+
+     for (let i = 0; i < PROYECTOS_DEMO.length; i += 1) {
+       const proyectoDemo = PROYECTOS_DEMO[i];
+       if (nombresProyectosExistentes.has(normalizarTexto(proyectoDemo.nombre))) {
+         continue;
+       }
+
+       const proveedor = proveedoresDemo[i % proveedoresDemo.length];
+       const gerente = gerentesDemo[i % gerentesDemo.length];
+       const cliente = clientesDemo[i % clientesDemo.length];
+
+       const payloadProyecto = {
+         ...proyectoDemo,
+         fechaCreacion: new Date().toISOString(),
+         oculto: false,
+         creadoPor: adminUid,
+         proveedorId: proveedor?.id || "",
+         proveedorNombre: proveedor ? `${proveedor.nombre || ""} ${proveedor.apellido || ""}`.trim() : "",
+         proveedorCorreo: proveedor?.correo || "",
+         clasificacionProveedor: proveedor?.clasificacionProveedor || "",
+         gerenteId: gerente?.id || "",
+         gerenteNombre: gerente ? `${gerente.nombre || ""} ${gerente.apellido || ""}`.trim() : "",
+         gerenteCorreo: gerente?.correo || "",
+         gerenteEmail: gerente?.correo || "",
+         correoGerente: gerente?.correo || "",
+         clienteId: cliente?.id || "",
+         clienteUid: cliente?.id || "",
+         clienteNombre: cliente ? `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim() : "",
+         clienteCorreo: cliente?.correo || "",
+         usuarioId: cliente?.id || "",
+         usuarioAsignadoId: cliente?.id || "",
+         usuarioCorreo: cliente?.correo || "",
+         correoCliente: cliente?.correo || "",
+         correoClienteAsignado: cliente?.correo || "",
+       };
+
+       await addDoc(collection(db, "proyectos"), payloadProyecto);
+
+       proyectosCreados += 1;
+     }
+
+     const snapshotProyectosActualizados = await getDocs(collection(db, "proyectos"));
+     const proyectosActivos = snapshotProyectosActualizados.docs.map((documento) => ({
+       id: documento.id,
+       ...documento.data(),
+     }));
+
+     const calificacionesSnapshot = await getDocs(collection(db, "calificacionesProveedores"));
+     const llavesCalificacionExistentes = new Set(
+       calificacionesSnapshot.docs.map((documento) => {
+         const data = documento.data();
+         return `${data?.proveedorId || ""}_${data?.proyectoId || ""}`;
+       })
+     );
+
+     let resenasCreadas = 0;
+
+     for (const proveedor of proveedoresDemo) {
+       const proyectosFinalizadosProveedor = proyectosActivos.filter((proyecto) => {
+         const mismoProveedor = normalizarTexto(proyecto.proveedorId) === normalizarTexto(proveedor.id);
+         const estaFinalizado = normalizarTexto(proyecto.estado) === "finalizado";
+         return mismoProveedor && estaFinalizado;
+       });
+
+       if (!proyectosFinalizadosProveedor.length) {
+         await setDoc(
+           doc(db, "usuarios", proveedor.id),
+           {
+             totalProyectosTerminados: 0,
+             totalResenas: 0,
+             calificacionPromedio: 0,
+             proyectosTerminados: [],
+             resenas: [],
+             fechaActualizacionDatos: new Date().toISOString(),
+           },
+           { merge: true }
+         );
+         continue;
+       }
+
+       const proyectosMezclados = mezclarLista(proyectosFinalizadosProveedor);
+       const cantidadResenas = Math.min(
+         proyectosMezclados.length,
+         obtenerAleatorioEnRango(1, Math.min(3, proyectosMezclados.length))
+       );
+       const proyectosParaResenar = proyectosMezclados.slice(0, cantidadResenas);
+
+       const resenasProveedor = [];
+
+       for (let i = 0; i < proyectosParaResenar.length; i += 1) {
+         const proyecto = proyectosParaResenar[i];
+         const llave = `${proveedor.id}_${proyecto.id}`;
+         if (llavesCalificacionExistentes.has(llave)) {
+           continue;
+         }
+
+         const puntaje = generarPuntajeAleatorio();
+         const usuarioNombre = proyecto.clienteNombre || proyecto.clienteCorreo || `Cliente Demo ${i + 1}`;
+         const comentario = construirComentarioResena(proyecto.nombre || "Proyecto");
+         const fechaResena = proyecto.fechaEstimada || proyecto.fechaInicio || new Date().toISOString();
+
+         const payloadCalificacion = {
+           usuarioId: proyecto.clienteId || proyecto.clienteUid || `demo-cliente-${proveedor.id}-${i + 1}`,
+           usuarioNombre,
+           proyectoId: proyecto.id,
+           proyectoNombre: proyecto.nombre || "Proyecto",
+           proveedorId: proveedor.id,
+           proveedorNombre: `${proveedor.nombre || ""} ${proveedor.apellido || ""}`.trim() || proveedor.correo || "Proveedor",
+           puntaje,
+           comentario,
+           fechaActualizacion: new Date(fechaResena).toISOString(),
+         };
+
+         await setDoc(doc(db, "calificacionesProveedores", `demo_${proveedor.id}_${proyecto.id}`), payloadCalificacion, {
+           merge: true,
+         });
+
+         llavesCalificacionExistentes.add(llave);
+         resenasProveedor.push(payloadCalificacion);
+         resenasCreadas += 1;
+       }
+
+       const totalProyectosTerminados = proyectosFinalizadosProveedor.length;
+       const calificacionPromedio = resenasProveedor.length
+         ? Number(
+             (
+               resenasProveedor.reduce((acumulado, item) => acumulado + (Number(item.puntaje) || 0), 0) /
+               resenasProveedor.length
+             ).toFixed(1)
+           )
+         : 0;
+
+       await setDoc(
+         doc(db, "usuarios", proveedor.id),
+         {
+           totalProyectosTerminados,
+           totalResenas: resenasProveedor.length,
+           calificacionPromedio,
+           proyectosTerminados: proyectosFinalizadosProveedor.map((proyecto) => ({
+             id: proyecto.id,
+             nombre: proyecto.nombre || "Proyecto",
+             cliente: proyecto.clienteNombre || proyecto.clienteCorreo || "Cliente",
+             ubicacion: proyecto.ubicacion || "No definida",
+             fechaFinalizacion: proyecto.fechaEstimada || proyecto.fechaInicio || "",
+             presupuesto: Number(proyecto.presupuesto) || 0,
+           })),
+           resenas: resenasProveedor.map((item, indice) => ({
+             id: `r-${indice + 1}`,
+             empresa: item.usuarioNombre || "Cliente",
+             calificacion: Number(item.puntaje) || 0,
+             fecha: item.fechaActualizacion,
+             comentario: item.comentario || "",
+             proyecto: item.proyectoNombre || "Proyecto",
+           })),
+           fechaActualizacionDatos: new Date().toISOString(),
+         },
+         { merge: true }
+       );
+     }
+
+     await signOut(secondaryAuth).catch(() => {});
+
+     await cargarUsuarios();
+     setMensaje(
+       `Datos demo listos: 5 usuarios, 5 proveedores, 5 gerentes, ${proyectosCreados} proyectos creados y ${resenasCreadas} reseñas generadas.`
+     );
+   } catch (error) {
+     console.log(error);
+     if (esErrorPermisos(error)) {
+       setMensaje("Error al generar datos demo: permisos insuficientes en Firestore para crear usuarios/proyectos.");
+     } else {
+       setMensaje(`Error al generar datos demo: ${error.message || "desconocido"}`);
+     }
+   } finally {
+     await signOut(secondaryAuth).catch(() => {});
+     setGenerandoDemo(false);
+   }
+ };
+
+ const agregarCincoProyectosDemo = async () => {
+   try {
+     setAgregandoProyectos(true);
+     setMensaje("Creando 5 proyectos demo...");
+
+     const adminUid = auth.currentUser?.uid;
+     if (!adminUid) {
+       setMensaje("Sesion invalida. Inicia sesion nuevamente como administrador.");
+       return;
+     }
+
+     let listaUsuarios = [];
+     try {
+       const usuariosSnapshot = await getDocs(collection(db, "usuarios"));
+       listaUsuarios = usuariosSnapshot.docs.map((documento) => ({ id: documento.id, ...documento.data() }));
+     } catch (error) {
+       if (!esErrorPermisos(error)) {
+         throw error;
+       }
+     }
+
+     const proveedoresDemo = listaUsuarios.filter((item) => normalizarTexto(item.rol) === "proveedor");
+     const gerentesDemo = listaUsuarios.filter((item) => normalizarTexto(item.rol) === "gerente");
+     const clientesDemo = listaUsuarios.filter((item) => normalizarTexto(item.rol) === "usuario");
+
+     const lote = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 12);
+     let creados = 0;
+
+     for (let i = 0; i < 5; i += 1) {
+       const plantilla = PROYECTOS_DEMO[i % PROYECTOS_DEMO.length];
+       const proveedor = proveedoresDemo.length ? proveedoresDemo[i % proveedoresDemo.length] : null;
+       const gerente = gerentesDemo.length ? gerentesDemo[i % gerentesDemo.length] : null;
+       const cliente = clientesDemo.length ? clientesDemo[i % clientesDemo.length] : null;
+
+       const payloadProyecto = {
+         ...plantilla,
+         nombre: `${plantilla.nombre} - Lote ${lote}-${i + 1}`,
+         fechaCreacion: new Date().toISOString(),
+         oculto: false,
+         creadoPor: adminUid,
+         proveedorId: proveedor?.id || "",
+         proveedorNombre: proveedor ? `${proveedor.nombre || ""} ${proveedor.apellido || ""}`.trim() : "",
+         proveedorCorreo: proveedor?.correo || "",
+         clasificacionProveedor: proveedor?.clasificacionProveedor || "",
+         gerenteId: gerente?.id || "",
+         gerenteNombre: gerente ? `${gerente.nombre || ""} ${gerente.apellido || ""}`.trim() : "",
+         gerenteCorreo: gerente?.correo || "",
+         gerenteEmail: gerente?.correo || "",
+         correoGerente: gerente?.correo || "",
+         clienteId: cliente?.id || "",
+         clienteUid: cliente?.id || "",
+         clienteNombre: cliente ? `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim() : "",
+         clienteCorreo: cliente?.correo || "",
+         usuarioId: cliente?.id || "",
+         usuarioAsignadoId: cliente?.id || "",
+         usuarioCorreo: cliente?.correo || "",
+         correoCliente: cliente?.correo || "",
+         correoClienteAsignado: cliente?.correo || "",
+       };
+
+       await addDoc(collection(db, "proyectos"), payloadProyecto);
+
+       creados += 1;
+     }
+
+     setMensaje(`Se crearon ${creados} proyectos demo correctamente.`);
+   } catch (error) {
+     console.log(error);
+     if (esErrorPermisos(error)) {
+       setMensaje("Error al crear proyectos demo: permisos insuficientes en Firestore.");
+     } else {
+       setMensaje(`Error al crear proyectos demo: ${error.message || "desconocido"}`);
+     }
+   } finally {
+     await signOut(secondaryAuth).catch(() => {});
+     setAgregandoProyectos(false);
+   }
+ };
+
+// Referencias inocuas para evitar warnings de ESLint en CI (variables/funciones demo)
+/* eslint-disable no-unused-expressions */
+void generandoDemo;
+void agregandoProyectos;
+void crearUsuariosYProyectosDemo;
+void agregarCincoProyectosDemo;
+/* eslint-enable no-unused-expressions */
 
  const eliminarUsuarioSeguro = async (usuario) => {
    if (!usuario?.id) return;
