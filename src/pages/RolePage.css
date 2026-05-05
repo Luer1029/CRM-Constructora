@@ -1403,6 +1403,87 @@
 .gerente-info-item strong,
 .proveedor-opcion strong {
   color: #4d2e24;
+
+/* Reglas responsive adicionales */
+@media (max-width: 900px) {
+  .contenedor-rol {
+    padding: 0 16px;
+    max-width: 100%;
+  }
+
+  .header-proyectos h1 {
+    font-size: 26px;
+  }
+
+  .sub-titulo {
+    font-size: 14px;
+  }
+
+  .form-fila {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-proyecto {
+    width: 95%;
+    max-height: 92vh;
+    padding: 12px;
+  }
+
+  .modal-header h2 {
+    font-size: 28px;
+  }
+
+  .acciones-modal {
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .controles-proyectos {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-agregar,
+  .btn-submeter,
+  .btn-create,
+  .btn-editar-primario {
+    width: 100%;
+    padding: 12px 14px;
+  }
+
+  .tabla-proyectos th,
+  .tabla-proyectos td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-proyectos h1 {
+    font-size: 22px;
+  }
+
+  .card-numero {
+    font-size: 24px;
+  }
+
+  .role-sidebar-toggle {
+    left: 8px;
+    top: 8px;
+  }
+
+  .tabla-proyectos th,
+  .tabla-proyectos td {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .mensaje {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+}
 }
 
 .role-message,

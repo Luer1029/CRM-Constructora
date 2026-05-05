@@ -712,23 +712,7 @@ function AdministradorPage(){
         + Nuevo Usuario
       </button>
 
-      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "12px" }}>
-        <button
-          className="btn-submeter"
-          onClick={crearUsuariosYProyectosDemo}
-          disabled={generandoDemo}
-        >
-          {generandoDemo ? "Generando demo..." : "Generar demo (usuarios + proyectos + reseñas)"}
-        </button>
-
-        <button
-          className="btn-ver"
-          onClick={agregarCincoProyectosDemo}
-          disabled={agregandoProyectos}
-        >
-          {agregandoProyectos ? "Creando proyectos..." : "Agregar 5 proyectos demo"}
-        </button>
-      </div>
+      {/* Botones demo eliminados para producción */}
 
       {mostrarFormulario && (
         <div
